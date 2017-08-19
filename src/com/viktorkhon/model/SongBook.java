@@ -17,7 +17,7 @@ public class SongBook {
         mSongs.add(song);
     }
 
-    public int SongCount() {
+    public int getSongCount() {
         return mSongs.size();
     }
 }

@@ -10,21 +10,25 @@ public class KaraokeMachine {
     private SongBook mSongBook;
     private BufferedReader mReader;
     private Map<String, String> mMenu;
+    private Queue<Song> mSongQueue;
 
     public KaraokeMachine(SongBook songBook) {
         mSongBook = songBook;
         // InputStreamReader reads bytes and decodes them into a specified cahrset
         // For efficiency purposes we also wrap it into a BufferReader
         mReader = new BufferedReader(new InputStreamReader(System.in));
+        mSongQueue = new ArrayDeque<Song>();
         // Create a UI menu using Map<Key, Value> interface
         mMenu = new HashMap<String, String>();
         mMenu.put("add", "Add song");
+        mMenu.put("play", "Play next song in the queue");
         mMenu.put("choose", "Choose a song");
         mMenu.put("quit", "Exit");
     }
 
     private String promptAction() throws IOException {
-        System.out.printf("There are %d songs available. Your options are: %n", mSongBook.getSongCount());
+        System.out.printf("There are %d songs available and %d in the queue. Your options are: %n",
+                mSongBook.getSongCount(), mSongQueue.size());
         // Go through the loop and extract Set<Map.Entry<K,V>>, then print individually a Key - Value pair
         for (Map.Entry<String, String> options : mMenu.entrySet()) {
             System.out.printf("%s - %s %n", options.getKey(), options.getValue());
@@ -50,8 +54,12 @@ public class KaraokeMachine {
                     case "choose":
                         String artist = promptArtist();
                         Song artistSong = promptSongForArtist(artist);
-                        //TO DO: add to the queue
+                        // Add songs to the queue
+                        mSongQueue.add(artistSong);
                         System.out.printf("You chose: %s %n", artistSong);
+                        break;
+                    case "play":
+                        playNext();
                         break;
                     case "quit":
                         System.out.println("Thanks for playing");
@@ -93,6 +101,7 @@ public class KaraokeMachine {
         for (Song song : songs) {
             songTitles.add(song.getmTitle());
         }
+        System.out.printf("Available songs for %s: %n", artist);
         int index = promptForIndex(songTitles);
         return songs.get(index);
     }
@@ -112,4 +121,14 @@ public class KaraokeMachine {
         return choice - 1;
     }
 
+    public void playNext() {
+        // Take the next Song object in the queue, retrieve it and then remove from queue
+        Song song = mSongQueue.poll();
+        if (song == null) {
+            System.out.println("There are no songs in the queue. Choose from the menu");
+        } else {
+            System.out.printf("%n%n%n Open %s to hear %s by %s %n%n%n", song.getmVideoUrl(),
+                    song.getmTitle(), song.getmArtist());
+        }
+    }
 }
